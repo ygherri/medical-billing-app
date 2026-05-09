@@ -26,6 +26,52 @@
       <p>Consultez le total encaissé par jour et filtrez les factures par date.</p>
     </article>
   </section>
+  <section class="patients-section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Patients</p>
+        <h2>Ajouter un patient</h2>
+      </div>
+    </div>
+
+    <form class="patient-form" (ngSubmit)="createPatient()">
+      <div class="form-group">
+        <label for="firstName">Prénom</label>
+        <input
+          id="firstName"
+          type="text"
+          placeholder="Ex : Sarah"
+          [ngModel]="newPatientFirstName()"
+          (ngModelChange)="newPatientFirstName.set($event)"
+          name="firstName"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Nom</label>
+        <input
+          id="lastName"
+          type="text"
+          placeholder="Ex : Martin"
+          [ngModel]="newPatientLastName()"
+          (ngModelChange)="newPatientLastName.set($event)"
+          name="lastName"
+        />
+      </div>
+
+      <button type="submit" [disabled]="isCreatingPatient()">
+        {{ isCreatingPatient() ? 'Ajout en cours...' : 'Ajouter le patient' }}
+      </button>
+    </form>
+
+    @if (createPatientError()) {
+      <p class="error-message">{{ createPatientError() }}</p>
+    }
+
+    @if (createPatientSuccess()) {
+      <p class="success-message">{{ createPatientSuccess() }}</p>
+    }
+  </section>
    <section class="patients-section">
     <div class="section-header">
       <div>

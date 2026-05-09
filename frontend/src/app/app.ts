@@ -1,10 +1,12 @@
 import { Component, signal, OnInit, inject } from '@angular/core';
 import { MedicalBillingApiService } from './services/medical-billing-api.service';
 import { Patient } from './models/patient.model';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -14,6 +16,12 @@ export class App implements OnInit {
   patients = signal<Patient[]>([]);
   isLoadingPatients = signal(false);
   patientsError = signal<string | null>(null);
+
+  newPatientFirstName = signal('');
+  newPatientLastName = signal('');
+  isCreatingPatient = signal(false);
+  createPatientError = signal<string | null>(null);
+  createPatientSuccess = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadPatients();
@@ -35,5 +43,43 @@ export class App implements OnInit {
         this.isLoadingPatients.set(false);
       },
     });
+  }
+  createPatient(): void {
+    const firstName = this.newPatientFirstName().trim();
+    const lastName = this.newPatientLastName().trim();
+
+    this.createPatientError.set(null);
+    this.createPatientSuccess.set(null);
+
+    if (!firstName || !lastName) {
+      this.createPatientError.set('Veuillez renseigner le prénom et le nom du patient.');
+      return;
+    }
+
+    this.isCreatingPatient.set(true);
+
+    this.medicalBillingApi
+      .createPatient({
+        firstName,
+        lastName,
+      })
+      .subscribe({
+        next: () => {
+          this.newPatientFirstName.set('');
+          this.newPatientLastName.set('');
+          this.isCreatingPatient.set(false);
+          this.createPatientSuccess.set('Patient ajouté avec succès.');
+          this.loadPatients();
+          setTimeout(() => {
+            this.createPatientSuccess.set(null);
+          }, 3000);
+        },
+        error: () => {
+          this.createPatientError.set(
+            'Impossible d’ajouter le patient. Vérifiez que le backend est bien lancé.',
+          );
+          this.isCreatingPatient.set(false);
+        },
+      });
   }
 }

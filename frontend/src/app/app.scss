@@ -152,3 +152,60 @@ button:hover {
     width: 100%;
   }
 }
+.patient-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  margin-top: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+input {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  outline: none;
+  background: #ffffff;
+}
+
+input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-message {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .patient-form {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-form button {
+    width: 100%;
+  }
+}
