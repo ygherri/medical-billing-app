@@ -8,6 +8,60 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 export class InvoicesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getDailySummary(date?: string) {
+    const selectedDate = date ?? new Date().toISOString().slice(0, 10);
+    const [year, month, day] = selectedDate.split('-').map(Number);
+
+    const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0));
+
+    const invoices = await this.prisma.invoice.findMany({
+      where: {
+        billingDate: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      include: {
+        patient: true,
+      },
+      orderBy: {
+        billingDate: 'desc',
+      },
+    });
+
+    const totalAmount = invoices.reduce((total, invoice) => {
+      return total + Number(invoice.amount);
+    }, 0);
+
+    const paymentMethods = invoices.reduce<Record<string, number>>(
+      (summary, invoice) => {
+        const method = invoice.paymentMethod;
+        summary[method] = (summary[method] ?? 0) + Number(invoice.amount);
+        return summary;
+      },
+      {},
+    );
+
+    const coverageTypes = invoices.reduce<Record<string, number>>(
+      (summary, invoice) => {
+        const type = invoice.coverageType;
+        summary[type] = (summary[type] ?? 0) + 1;
+        return summary;
+      },
+      {},
+    );
+
+    return {
+      date: selectedDate,
+      invoiceCount: invoices.length,
+      totalAmount: Number(totalAmount.toFixed(2)),
+      paymentMethods,
+      coverageTypes,
+      invoices,
+    };
+  }
+
   async findAll() {
     return this.prisma.invoice.findMany({
       include: {

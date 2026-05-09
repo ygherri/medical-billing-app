@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -19,7 +20,10 @@ export class InvoicesController {
   findAll() {
     return this.invoicesService.findAll();
   }
-
+  @Get('summary/daily')
+  getDailySummary(@Query('date') date?: string) {
+    return this.invoicesService.getDailySummary(date);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.invoicesService.findOne(id);
