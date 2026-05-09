@@ -26,6 +26,86 @@
       <p>Consultez le total encaissé par jour et filtrez les factures par date.</p>
     </article>
   </section>
+  <section class="summary-section">
+  <div class="section-header">
+    <div>
+      <p class="eyebrow">Résumé</p>
+      <h2>Résumé journalier</h2>
+    </div>
+
+    <div class="summary-date-filter">
+      <input
+        type="date"
+        [ngModel]="selectedSummaryDate()"
+        (ngModelChange)="selectedSummaryDate.set($event); loadDailySummary()"
+        name="selectedSummaryDate"
+      />
+
+      <button type="button" (click)="loadDailySummary()">
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  @if (isLoadingSummary()) {
+    <p class="status-message">Chargement du résumé...</p>
+  }
+
+  @if (summaryError()) {
+    <p class="error-message">{{ summaryError() }}</p>
+  }
+
+  @if (dailySummary() && !summaryError()) {
+    <div class="summary-grid">
+      <article class="summary-card">
+        <span>Date</span>
+        <strong>{{ formatDate(dailySummary()!.date) }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Nombre de factures</span>
+        <strong>{{ dailySummary()!.invoiceCount }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Total encaissé</span>
+        <strong>{{ dailySummary()!.totalAmount }} €</strong>
+      </article>
+    </div>
+
+    <div class="summary-details">
+      <article>
+        <h3>Par mode de paiement</h3>
+
+        @if (getPaymentSummaryEntries().length === 0) {
+          <p class="empty-message">Aucun paiement classique enregistré.</p>
+        }
+
+        @for (entry of getPaymentSummaryEntries(); track entry.label) {
+          <div class="summary-row">
+            <span>{{ entry.label }}</span>
+            <strong>{{ entry.amount }} €</strong>
+          </div>
+        }
+      </article>
+
+      <article>
+        <h3>Par prise en charge</h3>
+
+        @if (getCoverageSummaryEntries().length === 0) {
+          <p class="empty-message">Aucune prise en charge enregistrée.</p>
+        }
+
+        @for (entry of getCoverageSummaryEntries(); track entry.label) {
+          <div class="summary-row">
+            <span>{{ entry.label }}</span>
+            <strong>{{ entry.count }}</strong>
+          </div>
+        }
+      </article>
+    </div>
+  }
+</section>
   <section class="patients-section">
     <div class="section-header">
       <div>

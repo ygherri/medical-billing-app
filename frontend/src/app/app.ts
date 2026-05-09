@@ -2,7 +2,13 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { MedicalBillingApiService } from './services/medical-billing-api.service';
 import { Patient } from './models/patient.model';
 import { FormsModule } from '@angular/forms';
-import { CoverageType, CreateInvoiceDto, Invoice, PaymentMethod } from './models/invoice.model';
+import {
+  CoverageType,
+  CreateInvoiceDto,
+  Invoice,
+  PaymentMethod,
+  DailyBillingSummary,
+} from './models/invoice.model';
 
 
 
@@ -20,6 +26,10 @@ export class App implements OnInit {
 
   patients = signal<Patient[]>([]);
   invoices = signal<Invoice[]>([]);
+  dailySummary = signal<DailyBillingSummary | null>(null);
+  selectedSummaryDate = signal(new Date().toISOString().slice(0, 10));
+  isLoadingSummary = signal(false);
+  summaryError = signal<string | null>(null);
 
   isLoadingPatients = signal(false);
   isLoadingInvoices = signal(false);
@@ -63,6 +73,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.loadPatients();
     this.loadInvoices();
+    this.loadDailySummary();
   }
 
   loadPatients(): void {
@@ -96,6 +107,23 @@ export class App implements OnInit {
           'Impossible de charger les factures. Vérifiez que le backend est bien lancé.',
         );
         this.isLoadingInvoices.set(false);
+      },
+    });
+  }
+  loadDailySummary(): void {
+    this.isLoadingSummary.set(true);
+    this.summaryError.set(null);
+
+    this.medicalBillingApi.getDailySummary(this.selectedSummaryDate()).subscribe({
+      next: (summary) => {
+        this.dailySummary.set(summary);
+        this.isLoadingSummary.set(false);
+      },
+      error: () => {
+        this.summaryError.set(
+          'Impossible de charger le résumé journalier. Vérifiez que le backend est bien lancé.',
+        );
+        this.isLoadingSummary.set(false);
       },
     });
   }
@@ -185,6 +213,7 @@ export class App implements OnInit {
         this.createInvoiceError.set(null);
         this.createInvoiceSuccess.set('Facture ajoutée avec succès.');
         this.loadInvoices();
+        this.loadDailySummary();
 
         setTimeout(() => {
           this.createInvoiceSuccess.set(null);
@@ -211,7 +240,31 @@ export class App implements OnInit {
   getCoverageTypeLabel(type: CoverageType): string {
     return this.coverageTypes.find((coverageType) => coverageType.value === type)?.label ?? type;
   }
+  getPaymentSummaryEntries(): { label: string; amount: number }[] {
+    const summary = this.dailySummary();
 
+    if (!summary) {
+      return [];
+    }
+
+    return Object.entries(summary.paymentMethods).map(([method, amount]) => ({
+      label: this.getPaymentMethodLabel(method as PaymentMethod),
+      amount,
+    }));
+  }
+
+  getCoverageSummaryEntries(): { label: string; count: number }[] {
+    const summary = this.dailySummary();
+
+    if (!summary) {
+      return [];
+    }
+
+    return Object.entries(summary.coverageTypes).map(([type, count]) => ({
+      label: this.getCoverageTypeLabel(type as CoverageType),
+      count,
+    }));
+  }
   formatDate(date: string): string {
     return new Intl.DateTimeFormat('fr-FR').format(new Date(date));
   }

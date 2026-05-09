@@ -39,6 +39,9 @@ export class InvoicesService {
 
     const paymentMethods = invoices.reduce<Record<string, number>>(
       (summary, invoice) => {
+        if (!invoice.paymentMethod) {
+      return summary;
+    }
         const method = invoice.paymentMethod;
         summary[method] = (summary[method] ?? 0) + Number(invoice.amount);
         return summary;
@@ -130,7 +133,7 @@ return this.prisma.invoice.create({
   include: {
     patient: true,
   },
-});
+});}
 
   async update(id: string, updateInvoiceDto: UpdateInvoiceDto) {
     await this.findOne(id);
