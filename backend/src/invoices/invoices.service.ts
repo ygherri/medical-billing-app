@@ -1,4 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException, Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -99,24 +102,35 @@ export class InvoicesService {
       throw new NotFoundException('Patient not found');
     }
 
-    return this.prisma.invoice.create({
-      data: {
-        amount: createInvoiceDto.amount,
-        paymentMethod: createInvoiceDto.paymentMethod,
-        coverageType: createInvoiceDto.coverageType,
-        billingDate: new Date(createInvoiceDto.billingDate),
-        notes: createInvoiceDto.notes,
-        patient: {
-          connect: {
-            id: createInvoiceDto.patientId,
-          },
-        },
+    if (
+  createInvoiceDto.coverageType === 'STANDARD' &&
+  !createInvoiceDto.paymentMethod
+) {
+  throw new BadRequestException(
+    'Payment method is required for standard coverage',
+  );
+}
+
+return this.prisma.invoice.create({
+  data: {
+    amount: createInvoiceDto.amount,
+    paymentMethod:
+      createInvoiceDto.coverageType === 'STANDARD'
+        ? createInvoiceDto.paymentMethod
+        : null,
+    coverageType: createInvoiceDto.coverageType,
+    billingDate: new Date(createInvoiceDto.billingDate),
+    notes: createInvoiceDto.notes,
+    patient: {
+      connect: {
+        id: createInvoiceDto.patientId,
       },
-      include: {
-        patient: true,
-      },
-    });
-  }
+    },
+  },
+  include: {
+    patient: true,
+  },
+});
 
   async update(id: string, updateInvoiceDto: UpdateInvoiceDto) {
     await this.findOne(id);

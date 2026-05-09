@@ -7,7 +7,7 @@ export type CoverageType = 'STANDARD' | 'C2S' | 'ALD' | 'AME' | 'MATERNITY' | 'W
 export interface Invoice {
   id: string;
   amount: string;
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod | null;
   coverageType: CoverageType;
   billingDate: string;
   notes?: string;
@@ -19,7 +19,7 @@ export interface Invoice {
 
 export interface CreateInvoiceDto {
   amount: number;
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod | null;
   coverageType: CoverageType;
   billingDate: string;
   patientId: string;

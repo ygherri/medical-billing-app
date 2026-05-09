@@ -36,7 +36,7 @@ model Patient {
 model Invoice {
   id            String        @id @default(cuid())
   amount        Decimal       @db.Decimal(10, 2)
-  paymentMethod PaymentMethod
+  paymentMethod PaymentMethod?
   coverageType  CoverageType
   billingDate   DateTime
   notes         String?

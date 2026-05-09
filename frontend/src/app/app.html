@@ -111,4 +111,166 @@
       </div>
     }
   </section>
+  <section class="patients-section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Factures</p>
+        <h2>Ajouter une facture</h2>
+      </div>
+    </div>
+
+    <form class="invoice-form" (ngSubmit)="createInvoice()">
+      <div class="form-group">
+        <label for="invoicePatient">Patient</label>
+        <select
+          id="invoicePatient"
+          [ngModel]="invoicePatientId()"
+          (ngModelChange)="invoicePatientId.set($event)"
+          name="invoicePatient"
+        >
+          <option value="">Sélectionner un patient</option>
+
+          @for (patient of patients(); track patient.id) {
+            <option [value]="patient.id">
+              {{ patient.firstName }} {{ patient.lastName }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="invoiceAmount">Montant payé</label>
+        <input
+          id="invoiceAmount"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Ex : 25"
+          [ngModel]="invoiceAmount()"
+          (ngModelChange)="invoiceAmount.set($event)"
+          name="invoiceAmount"
+        />
+      </div>
+
+
+      <div class="form-group">
+        <label for="coverageType">Prise en charge</label>
+        <select
+          id="coverageType"
+          [ngModel]="invoiceCoverageType()"
+          (ngModelChange)="invoiceCoverageType.set($event)"
+          name="coverageType"
+        >
+          @for (coverage of coverageTypes; track coverage.value) {
+            <option [value]="coverage.value">{{ coverage.label }}</option>
+          }
+        </select>
+      </div>
+      @if (invoiceCoverageType() === 'STANDARD') {
+      <div class="form-group">
+        <label for="paymentMethod">Mode de paiement</label>
+        <select
+          id="paymentMethod"
+          [ngModel]="invoicePaymentMethod()"
+          (ngModelChange)="invoicePaymentMethod.set($event)"
+          name="paymentMethod"
+        >
+          @for (method of paymentMethods; track method.value) {
+            <option [value]="method.value">{{ method.label }}</option>
+          }
+        </select>
+      </div>
+}
+      <div class="form-group">
+        <label for="billingDate">Date</label>
+        <input
+          id="billingDate"
+          type="date"
+          [ngModel]="invoiceBillingDate()"
+          (ngModelChange)="invoiceBillingDate.set($event)"
+          name="billingDate"
+        />
+      </div>
+
+      <div class="form-group form-group-wide">
+        <label for="invoiceNotes">Note</label>
+        <input
+          id="invoiceNotes"
+          type="text"
+          placeholder="Ex : consultation réglée par carte"
+          [ngModel]="invoiceNotes()"
+          (ngModelChange)="invoiceNotes.set($event)"
+          name="invoiceNotes"
+        />
+      </div>
+
+      <button type="submit" [disabled]="isCreatingInvoice()">
+        {{ isCreatingInvoice() ? 'Ajout en cours...' : 'Ajouter la facture' }}
+      </button>
+    </form>
+
+    @if (createInvoiceError()) {
+      <p class="error-message">{{ createInvoiceError() }}</p>
+    }
+
+    @if (createInvoiceSuccess()) {
+      <p class="success-message">{{ createInvoiceSuccess() }}</p>
+    }
+  </section>
+
+  <section class="patients-section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Factures</p>
+        <h2>Liste des factures</h2>
+      </div>
+
+      <button type="button" (click)="loadInvoices()">
+        Actualiser
+      </button>
+    </div>
+
+    @if (isLoadingInvoices()) {
+      <p class="status-message">Chargement des factures...</p>
+    }
+
+    @if (invoicesError()) {
+      <p class="error-message">{{ invoicesError() }}</p>
+    }
+
+    @if (!isLoadingInvoices() && invoices().length === 0 && !invoicesError()) {
+      <p class="empty-message">
+        Aucune facture enregistrée pour le moment.
+      </p>
+    }
+
+    @if (invoices().length > 0) {
+      <div class="invoices-list">
+        @for (invoice of invoices(); track invoice.id) {
+          <article class="invoice-card">
+            <div>
+              <h3>
+                {{ invoice.patient?.firstName }} {{ invoice.patient?.lastName }}
+              </h3>
+              <p>
+                {{ formatDate(invoice.billingDate) }} ·
+  {{ getCoverageTypeLabel(invoice.coverageType) }}
+
+  @if (invoice.paymentMethod) {
+    · {{ getPaymentMethodLabel(invoice.paymentMethod) }}
+  }
+                
+              </p>
+
+              @if (invoice.notes) {
+                <p class="invoice-note">{{ invoice.notes }}</p>
+              }
+            </div>
+
+            <strong>{{ invoice.amount }} €</strong>
+          </article>
+        }
+      </div>
+    }
+  </section>
 </div>
