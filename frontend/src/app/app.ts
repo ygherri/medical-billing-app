@@ -54,6 +54,10 @@ export class App implements OnInit {
   createInvoiceError = signal<string | null>(null);
   createInvoiceSuccess = signal<string | null>(null);
 
+  deletingPatientId = signal<string | null>(null);
+  deletingInvoiceId = signal<string | null>(null);
+  deleteError = signal<string | null>(null);
+
   paymentMethods: { value: PaymentMethod; label: string }[] = [
     { value: 'CARD', label: 'Carte bancaire' },
     { value: 'CASH', label: 'Espèces' },
@@ -267,5 +271,52 @@ export class App implements OnInit {
   }
   formatDate(date: string): string {
     return new Intl.DateTimeFormat('fr-FR').format(new Date(date));
+  }
+  deleteInvoice(id: string): void {
+    const confirmed = confirm('Voulez-vous vraiment supprimer cette facture ?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deleteError.set(null);
+    this.deletingInvoiceId.set(id);
+
+    this.medicalBillingApi.deleteInvoice(id).subscribe({
+      next: () => {
+        this.deletingInvoiceId.set(null);
+        this.loadInvoices();
+        this.loadDailySummary();
+      },
+      error: () => {
+        this.deleteError.set('Impossible de supprimer la facture.');
+        this.deletingInvoiceId.set(null);
+      },
+    });
+  }
+  deletePatient(id: string, fullName: string): void {
+    const confirmed = confirm(
+      `Voulez-vous vraiment supprimer le patient ${fullName} ? Ses factures seront aussi supprimées.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deleteError.set(null);
+    this.deletingPatientId.set(id);
+
+    this.medicalBillingApi.deletePatient(id).subscribe({
+      next: () => {
+        this.deletingPatientId.set(null);
+        this.loadPatients();
+        this.loadInvoices();
+        this.loadDailySummary();
+      },
+      error: () => {
+        this.deleteError.set('Impossible de supprimer le patient.');
+        this.deletingPatientId.set(null);
+      },
+    });
   }
 }
