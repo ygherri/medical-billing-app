@@ -23,6 +23,7 @@ export class App implements OnInit {
   onCoverageTypeChange(coverageType: CoverageType): void {
     this.invoiceCoverageType.set(coverageType);
   }
+  activeForm: 'patient' | 'facture' = 'facture';
 
   patients = signal<Patient[]>([]);
   invoices = signal<Invoice[]>([]);

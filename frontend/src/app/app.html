@@ -1,375 +1,539 @@
-<div class="app">
-  <header class="hero">
-    <p class="eyebrow">Facturation Médicale</p>
+<div class="app-shell">
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">
+          <i class="ri-hospital-line"></i>
+        </div>
 
-    <h1>Gérez facilement la facturation quotidienne du cabinet</h1>
+        <div>
+          <p>Cabinet médical</p>
+          <h1>MedBilling</h1>
+        </div>
+      </div>
 
-    <p class="description">
-      Une application fullstack pour gérer les patients, les factures journalières,
-      les modes de paiement et les types de prise en charge.
-    </p>
-  </header>
+      <nav class="sidebar-nav">
+        <button type="button" class="active">
+          <i class="ri-dashboard-line"></i>
+          <span>Tableau de bord</span>
+        </button>
 
-  <section class="features">
-    <article>
-      <h2>Patients</h2>
-      <p>Ajoutez et gérez les informations des patients du cabinet.</p>
-    </article>
+        <button type="button">
+          <i class="ri-user-3-line"></i>
+          <span>Patients</span>
+        </button>
 
-    <article>
-      <h2>Factures</h2>
-      <p>Enregistrez les paiements, les montants et les prises en charge.</p>
-    </article>
+        <button type="button">
+          <i class="ri-file-list-3-line"></i>
+          <span>Factures</span>
+        </button>
 
-    <article>
-      <h2>Résumé journalier</h2>
-      <p>Consultez le total encaissé par jour et filtrez les factures par date.</p>
-    </article>
-  </section>
-  <section class="summary-section">
-  <div class="section-header">
-    <div>
-      <p class="eyebrow">Résumé</p>
-      <h2>Résumé journalier</h2>
+        <button type="button">
+          <i class="ri-wallet-3-line"></i>
+          <span>Résumé</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-icon">
+          <i class="ri-shield-check-line"></i>
+        </div>
+
+        <h2>Résumé sécurisé</h2>
+
+        <p>
+          Suivi clair des encaissements, prises en charge et factures du jour.
+        </p>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="top-card">
+        <div>
+          <p class="date-badge">
+            <i class="ri-calendar-line"></i>
+            Facturation médicale
+          </p>
+
+          <h1>Tableau de bord de facturation</h1>
+
+          <p class="top-description">
+            Gérez les patients, ajoutez les factures et visualisez le résumé journalier du cabinet en quelques secondes.
+          </p>
+        </div>
+
+        <div class="top-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="loadDailySummary(); loadPatients(); loadInvoices()"
+          >
+            <i class="ri-refresh-line"></i>
+            Actualiser
+          </button>
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="activeForm = 'facture'"
+          >
+            <i class="ri-add-line"></i>
+            Nouvelle facture
+          </button>
+        </div>
+      </header>
+
+      @if (deleteError()) {
+        <p class="error-message global-message">{{ deleteError() }}</p>
+      }
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div>
+            <p>Total encaissé</p>
+
+            <strong>
+              {{ dailySummary() ? dailySummary()!.totalAmount : 0 }} €
+            </strong>
+
+            <span>Aujourd’hui</span>
+          </div>
+
+          <div class="stat-icon">
+            <i class="ri-wallet-3-line"></i>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div>
+            <p>Factures du jour</p>
+
+            <strong>
+              {{ dailySummary() ? dailySummary()!.invoiceCount : invoices().length }}
+            </strong>
+
+            <span>Factures enregistrées</span>
+          </div>
+
+          <div class="stat-icon">
+            <i class="ri-file-list-3-line"></i>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div>
+            <p>Patients actifs</p>
+
+            <strong>{{ patients().length }}</strong>
+
+            <span>Patients enregistrés</span>
+          </div>
+
+          <div class="stat-icon">
+            <i class="ri-user-heart-line"></i>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <section class="panel form-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Saisie rapide</p>
+              <h2>Ajouter une donnée</h2>
+            </div>
+
+            <div class="form-tabs">
+              <button
+                type="button"
+                [class.active]="activeForm === 'patient'"
+                (click)="activeForm = 'patient'"
+              >
+                <i class="ri-user-add-line"></i>
+                Patient
+              </button>
+
+              <button
+                type="button"
+                [class.active]="activeForm === 'facture'"
+                (click)="activeForm = 'facture'"
+              >
+                <i class="ri-file-add-line"></i>
+                Facture
+              </button>
+            </div>
+          </div>
+
+          @if (activeForm === 'patient') {
+            <form class="quick-patient-form" (ngSubmit)="createPatient()">
+  <div class="quick-form-grid">
+    <div class="form-group">
+      <label for="firstName">Prénom</label>
+      <input
+        id="firstName"
+        type="text"
+        placeholder="Ex : Sarah"
+        [ngModel]="newPatientFirstName()"
+        (ngModelChange)="newPatientFirstName.set($event)"
+        name="firstName"
+      />
     </div>
 
-    <div class="summary-date-filter">
+    <div class="form-group">
+      <label for="lastName">Nom</label>
       <input
-        type="date"
-        [ngModel]="selectedSummaryDate()"
-        (ngModelChange)="selectedSummaryDate.set($event); loadDailySummary()"
-        name="selectedSummaryDate"
+        id="lastName"
+        type="text"
+        placeholder="Ex : Martin"
+        [ngModel]="newPatientLastName()"
+        (ngModelChange)="newPatientLastName.set($event)"
+        name="lastName"
       />
-
-      <button type="button" (click)="loadDailySummary()">
-        Actualiser
-      </button>
     </div>
   </div>
 
-  @if (isLoadingSummary()) {
-    <p class="status-message">Chargement du résumé...</p>
-  }
+  <div class="quick-form-actions">
+    <button class="primary-action-button" type="submit" [disabled]="isCreatingPatient()">
+      <i class="ri-user-add-line"></i>
+      {{ isCreatingPatient() ? 'Ajout en cours...' : 'Ajouter le patient' }}
+    </button>
+  </div>
+</form>
 
-  @if (summaryError()) {
-    <p class="error-message">{{ summaryError() }}</p>
-  }
+            @if (createPatientError()) {
+              <p class="error-message">{{ createPatientError() }}</p>
+            }
 
-  @if (dailySummary() && !summaryError()) {
-    <div class="summary-grid">
-      <article class="summary-card">
-        <span>Date</span>
-        <strong>{{ formatDate(dailySummary()!.date) }}</strong>
-      </article>
+            @if (createPatientSuccess()) {
+              <p class="success-message">{{ createPatientSuccess() }}</p>
+            }
+          }
 
-      <article class="summary-card">
-        <span>Nombre de factures</span>
-        <strong>{{ dailySummary()!.invoiceCount }}</strong>
-      </article>
+          @if (activeForm === 'facture') {
+            <form class="quick-form invoice-form" (ngSubmit)="createInvoice()">
+              <div class="form-group">
+                <label for="invoicePatient">Patient</label>
 
-      <article class="summary-card">
-        <span>Total encaissé</span>
-        <strong>{{ dailySummary()!.totalAmount }} €</strong>
-      </article>
-    </div>
+                <select
+                  id="invoicePatient"
+                  [ngModel]="invoicePatientId()"
+                  (ngModelChange)="invoicePatientId.set($event)"
+                  name="invoicePatient"
+                >
+                  <option value="">Sélectionner un patient</option>
 
-    <div class="summary-details">
-      <article>
-        <h3>Par mode de paiement</h3>
+                  @for (patient of patients(); track patient.id) {
+                    <option [value]="patient.id">
+                      {{ patient.firstName }} {{ patient.lastName }}
+                    </option>
+                  }
+                </select>
+              </div>
 
-        @if (getPaymentSummaryEntries().length === 0) {
-          <p class="empty-message">Aucun paiement classique enregistré.</p>
-        }
+              <div class="form-group">
+                <label for="invoiceAmount">Montant payé</label>
 
-        @for (entry of getPaymentSummaryEntries(); track entry.label) {
-          <div class="summary-row">
-            <span>{{ entry.label }}</span>
-            <strong>{{ entry.amount }} €</strong>
-          </div>
-        }
-      </article>
+                <input
+                  id="invoiceAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ex : 25"
+                  [ngModel]="invoiceAmount()"
+                  (ngModelChange)="invoiceAmount.set($event)"
+                  name="invoiceAmount"
+                />
+              </div>
 
-      <article>
-        <h3>Par prise en charge</h3>
+              <div class="form-group">
+                <label for="coverageType">Prise en charge</label>
 
-        @if (getCoverageSummaryEntries().length === 0) {
-          <p class="empty-message">Aucune prise en charge enregistrée.</p>
-        }
+                <select
+                  id="coverageType"
+                  [ngModel]="invoiceCoverageType()"
+                  (ngModelChange)="invoiceCoverageType.set($event)"
+                  name="coverageType"
+                >
+                  @for (coverage of coverageTypes; track coverage.value) {
+                    <option [value]="coverage.value">
+                      {{ coverage.label }}
+                    </option>
+                  }
+                </select>
+              </div>
 
-        @for (entry of getCoverageSummaryEntries(); track entry.label) {
-          <div class="summary-row">
-            <span>{{ entry.label }}</span>
-            <strong>{{ entry.count }}</strong>
-          </div>
-        }
-      </article>
-    </div>
-  }
-</section>
-  <section class="patients-section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Patients</p>
-        <h2>Ajouter un patient</h2>
-      </div>
-    </div>
+              @if (invoiceCoverageType() === 'STANDARD') {
+                <div class="form-group">
+                  <label for="paymentMethod">Mode de paiement</label>
 
-    <form class="patient-form" (ngSubmit)="createPatient()">
-      <div class="form-group">
-        <label for="firstName">Prénom</label>
-        <input
-          id="firstName"
-          type="text"
-          placeholder="Ex : Sarah"
-          [ngModel]="newPatientFirstName()"
-          (ngModelChange)="newPatientFirstName.set($event)"
-          name="firstName"
-        />
-      </div>
+                  <select
+                    id="paymentMethod"
+                    [ngModel]="invoicePaymentMethod()"
+                    (ngModelChange)="invoicePaymentMethod.set($event)"
+                    name="paymentMethod"
+                  >
+                    @for (method of paymentMethods; track method.value) {
+                      <option [value]="method.value">
+                        {{ method.label }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              }
 
-      <div class="form-group">
-        <label for="lastName">Nom</label>
-        <input
-          id="lastName"
-          type="text"
-          placeholder="Ex : Martin"
-          [ngModel]="newPatientLastName()"
-          (ngModelChange)="newPatientLastName.set($event)"
-          name="lastName"
-        />
-      </div>
+              <div class="form-group">
+                <label for="billingDate">Date</label>
 
-      <button type="submit" [disabled]="isCreatingPatient()">
-        {{ isCreatingPatient() ? 'Ajout en cours...' : 'Ajouter le patient' }}
-      </button>
-    </form>
+                <input
+                  id="billingDate"
+                  type="date"
+                  [ngModel]="invoiceBillingDate()"
+                  (ngModelChange)="invoiceBillingDate.set($event)"
+                  name="billingDate"
+                />
+              </div>
 
-    @if (createPatientError()) {
-      <p class="error-message">{{ createPatientError() }}</p>
-    }
+              <div class="form-group form-group-wide">
+                <label for="invoiceNotes">Note</label>
 
-    @if (createPatientSuccess()) {
-      <p class="success-message">{{ createPatientSuccess() }}</p>
-    }
-  </section>
-  @if (deleteError()) {
-  <p class="error-message">{{ deleteError() }}</p>
-}
-   <section class="patients-section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Patients</p>
-        <h2>Liste des patients</h2>
-      </div>
+                <input
+                  id="invoiceNotes"
+                  type="text"
+                  placeholder="Ex : consultation réglée par carte"
+                  [ngModel]="invoiceNotes()"
+                  (ngModelChange)="invoiceNotes.set($event)"
+                  name="invoiceNotes"
+                />
+              </div>
 
-      <button type="button" (click)="loadPatients()">
-        Actualiser
-      </button>
-    </div>
+              <button
+                type="submit"
+                class="primary-button form-button-wide"
+                [disabled]="isCreatingInvoice()"
+              >
+                <i class="ri-bank-card-line"></i>
+                {{ isCreatingInvoice() ? 'Ajout en cours...' : 'Ajouter la facture' }}
+              </button>
+            </form>
 
-    @if (isLoadingPatients()) {
-      <p class="status-message">Chargement des patients...</p>
-    }
+            @if (createInvoiceError()) {
+              <p class="error-message">{{ createInvoiceError() }}</p>
+            }
 
-    @if (patientsError()) {
-      <p class="error-message">{{ patientsError() }}</p>
-    }
+            @if (createInvoiceSuccess()) {
+              <p class="success-message">{{ createInvoiceSuccess() }}</p>
+            }
+          }
+        </section>
 
-    @if (!isLoadingPatients() && patients().length === 0 && !patientsError()) {
-      <p class="empty-message">
-        Aucun patient enregistré pour le moment.
-      </p>
-    }
-
-    @if (patients().length > 0) {
-      <div class="patients-list">
-        @for (patient of patients(); track patient.id) {
-          <article class="patient-card">
+        <section class="panel summary-panel">
+          <div class="panel-heading summary-heading">
             <div>
-              <h3>{{ patient.firstName }} {{ patient.lastName }}</h3>
-              <p>Identifiant : {{ patient.id }}</p>
+              <p class="eyebrow">Résumé</p>
+              <h2>Encaissement du jour</h2>
             </div>
-             <button
-    type="button"
-    class="danger-button"
-    [disabled]="deletingPatientId() === patient.id"
-    (click)="deletePatient(patient.id, patient.firstName + ' ' + patient.lastName)"
-  >
-    {{ deletingPatientId() === patient.id ? 'Suppression...' : 'Supprimer' }}
-  </button>
-          </article>
-        }
-      </div>
-    }
-  </section>
-  <section class="patients-section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Factures</p>
-        <h2>Ajouter une facture</h2>
-      </div>
-    </div>
 
-    <form class="invoice-form" (ngSubmit)="createInvoice()">
-      <div class="form-group">
-        <label for="invoicePatient">Patient</label>
-        <select
-          id="invoicePatient"
-          [ngModel]="invoicePatientId()"
-          (ngModelChange)="invoicePatientId.set($event)"
-          name="invoicePatient"
-        >
-          <option value="">Sélectionner un patient</option>
+            <input
+              class="summary-date-input"
+              type="date"
+              [ngModel]="selectedSummaryDate()"
+              (ngModelChange)="selectedSummaryDate.set($event); loadDailySummary()"
+              name="selectedSummaryDate"
+            />
+          </div>
 
-          @for (patient of patients(); track patient.id) {
-            <option [value]="patient.id">
-              {{ patient.firstName }} {{ patient.lastName }}
-            </option>
+          @if (isLoadingSummary()) {
+            <p class="status-message">Chargement du résumé...</p>
           }
-        </select>
-      </div>
 
-      <div class="form-group">
-        <label for="invoiceAmount">Montant payé</label>
-        <input
-          id="invoiceAmount"
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Ex : 25"
-          [ngModel]="invoiceAmount()"
-          (ngModelChange)="invoiceAmount.set($event)"
-          name="invoiceAmount"
-        />
-      </div>
-
-
-      <div class="form-group">
-        <label for="coverageType">Prise en charge</label>
-        <select
-          id="coverageType"
-          [ngModel]="invoiceCoverageType()"
-          (ngModelChange)="invoiceCoverageType.set($event)"
-          name="coverageType"
-        >
-          @for (coverage of coverageTypes; track coverage.value) {
-            <option [value]="coverage.value">{{ coverage.label }}</option>
+          @if (summaryError()) {
+            <p class="error-message">{{ summaryError() }}</p>
           }
-        </select>
-      </div>
-      @if (invoiceCoverageType() === 'STANDARD') {
-      <div class="form-group">
-        <label for="paymentMethod">Mode de paiement</label>
-        <select
-          id="paymentMethod"
-          [ngModel]="invoicePaymentMethod()"
-          (ngModelChange)="invoicePaymentMethod.set($event)"
-          name="paymentMethod"
-        >
-          @for (method of paymentMethods; track method.value) {
-            <option [value]="method.value">{{ method.label }}</option>
-          }
-        </select>
-      </div>
-}
-      <div class="form-group">
-        <label for="billingDate">Date</label>
-        <input
-          id="billingDate"
-          type="date"
-          [ngModel]="invoiceBillingDate()"
-          (ngModelChange)="invoiceBillingDate.set($event)"
-          name="billingDate"
-        />
-      </div>
 
-      <div class="form-group form-group-wide">
-        <label for="invoiceNotes">Note</label>
-        <input
-          id="invoiceNotes"
-          type="text"
-          placeholder="Ex : consultation réglée par carte"
-          [ngModel]="invoiceNotes()"
-          (ngModelChange)="invoiceNotes.set($event)"
-          name="invoiceNotes"
-        />
-      </div>
+          @if (dailySummary() && !summaryError()) {
+            <div class="cash-card">
+              <p>Total encaissé</p>
 
-      <button type="submit" [disabled]="isCreatingInvoice()">
-        {{ isCreatingInvoice() ? 'Ajout en cours...' : 'Ajouter la facture' }}
-      </button>
-    </form>
+              <strong>{{ dailySummary()!.totalAmount }} €</strong>
 
-    @if (createInvoiceError()) {
-      <p class="error-message">{{ createInvoiceError() }}</p>
-    }
+              <span>
+                {{ dailySummary()!.invoiceCount }} facture(s) enregistrée(s) aujourd’hui
+              </span>
+            </div>
 
-    @if (createInvoiceSuccess()) {
-      <p class="success-message">{{ createInvoiceSuccess() }}</p>
-    }
-  </section>
+            <div class="coverage-box">
+              <div class="coverage-box-header">
+                <div>
+                  <h3>Répartition des prises en charge</h3>
+                  <p>Vue rapide des factures enregistrées aujourd’hui</p>
+                </div>
 
-  <section class="patients-section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Factures</p>
-        <h2>Liste des factures</h2>
-      </div>
+                <span>
+                  {{ dailySummary()!.invoiceCount }} factures
+                </span>
+              </div>
 
-      <button type="button" (click)="loadInvoices()">
-        Actualiser
-      </button>
-    </div>
+              @if (getCoverageSummaryEntries().length === 0) {
+                <p class="empty-message">Aucune prise en charge enregistrée.</p>
+              }
 
-    @if (isLoadingInvoices()) {
-      <p class="status-message">Chargement des factures...</p>
-    }
-
-    @if (invoicesError()) {
-      <p class="error-message">{{ invoicesError() }}</p>
-    }
-
-    @if (!isLoadingInvoices() && invoices().length === 0 && !invoicesError()) {
-      <p class="empty-message">
-        Aucune facture enregistrée pour le moment.
-      </p>
-    }
-
-    @if (invoices().length > 0) {
-      <div class="invoices-list">
-        @for (invoice of invoices(); track invoice.id) {
-          <article class="invoice-card">
-            <div>
-              <h3>
-                {{ invoice.patient?.firstName }} {{ invoice.patient?.lastName }}
-              </h3>
-              <p>
-                {{ formatDate(invoice.billingDate) }} ·
-  {{ getCoverageTypeLabel(invoice.coverageType) }}
-
-  @if (invoice.paymentMethod) {
-    · {{ getPaymentMethodLabel(invoice.paymentMethod) }}
-  }
-                
-              </p>
-
-              @if (invoice.notes) {
-                <p class="invoice-note">{{ invoice.notes }}</p>
+              @for (entry of getCoverageSummaryEntries(); track entry.label) {
+                <div class="coverage-row">
+                  <span>{{ entry.label }}</span>
+                  <strong>{{ entry.count }}</strong>
+                </div>
               }
             </div>
+          }
 
-            <strong>{{ invoice.amount }} €</strong>
-             <button
-      type="button"
-      class="danger-button"
-      [disabled]="deletingInvoiceId() === invoice.id"
-      (click)="deleteInvoice(invoice.id)"
-    >
-      {{ deletingInvoiceId() === invoice.id ? 'Suppression...' : 'Supprimer' }}
-    </button>
-          </article>
-        }
-      </div>
-    }
-  </section>
+          @if (!dailySummary() && !isLoadingSummary() && !summaryError()) {
+            <p class="empty-message">
+              Sélectionnez une date pour afficher le résumé journalier.
+            </p>
+          }
+        </section>
+      </section>
+
+      <section class="bottom-grid">
+        <section class="panel list-panel">
+          <div class="panel-heading list-heading">
+            <div>
+              <p class="eyebrow">Patients</p>
+              <h2>Liste des patients</h2>
+            </div>
+
+            <button
+              type="button"
+              class="secondary-button compact-button"
+              (click)="loadPatients()"
+            >
+              <i class="ri-refresh-line"></i>
+              Actualiser
+            </button>
+          </div>
+
+          @if (isLoadingPatients()) {
+            <p class="status-message">Chargement des patients...</p>
+          }
+
+          @if (patientsError()) {
+            <p class="error-message">{{ patientsError() }}</p>
+          }
+
+          @if (!isLoadingPatients() && patients().length === 0 && !patientsError()) {
+            <p class="empty-message">
+              Aucun patient enregistré pour le moment.
+            </p>
+          }
+
+          @if (patients().length > 0) {
+            <div class="patients-list">
+              @for (patient of patients(); track patient.id) {
+                <article class="patient-card">
+                  <div class="patient-info">
+                    <div class="patient-avatar">
+                      <i class="ri-user-heart-line"></i>
+                    </div>
+
+                    <div>
+                      <h3>{{ patient.firstName }} {{ patient.lastName }}</h3>
+                      <p>Identifiant : {{ patient.id }}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="danger-button"
+                    [disabled]="deletingPatientId() === patient.id"
+                    (click)="deletePatient(patient.id, patient.firstName + ' ' + patient.lastName)"
+                  >
+                    <i class="ri-delete-bin-6-line"></i>
+                    {{ deletingPatientId() === patient.id ? 'Suppression...' : 'Supprimer' }}
+                  </button>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="panel list-panel">
+          <div class="panel-heading list-heading">
+            <div>
+              <p class="eyebrow">Factures</p>
+              <h2>Dernières factures</h2>
+            </div>
+
+            <button
+              type="button"
+              class="secondary-button compact-button"
+              (click)="loadInvoices()"
+            >
+              <i class="ri-refresh-line"></i>
+              Actualiser
+            </button>
+          </div>
+
+          @if (isLoadingInvoices()) {
+            <p class="status-message">Chargement des factures...</p>
+          }
+
+          @if (invoicesError()) {
+            <p class="error-message">{{ invoicesError() }}</p>
+          }
+
+          @if (!isLoadingInvoices() && invoices().length === 0 && !invoicesError()) {
+            <p class="empty-message">
+              Aucune facture enregistrée pour le moment.
+            </p>
+          }
+
+          @if (invoices().length > 0) {
+            <div class="invoices-list">
+              @for (invoice of invoices(); track invoice.id) {
+                <article class="invoice-card">
+                  <div>
+                    <div class="invoice-title">
+                      <h3>
+                        {{ invoice.patient?.firstName }} {{ invoice.patient?.lastName }}
+                      </h3>
+
+                      <span>
+                        {{ getCoverageTypeLabel(invoice.coverageType) }}
+                      </span>
+                    </div>
+
+                    <p>
+                      {{ formatDate(invoice.billingDate) }}
+
+                      @if (invoice.paymentMethod) {
+                        · {{ getPaymentMethodLabel(invoice.paymentMethod) }}
+                      }
+                    </p>
+
+                    @if (invoice.notes) {
+                      <p class="invoice-note">{{ invoice.notes }}</p>
+                    }
+                  </div>
+
+                  <div class="invoice-actions">
+                    <strong>{{ invoice.amount }} €</strong>
+
+                    <button
+                      type="button"
+                      class="danger-button"
+                      [disabled]="deletingInvoiceId() === invoice.id"
+                      (click)="deleteInvoice(invoice.id)"
+                    >
+                      <i class="ri-delete-bin-6-line"></i>
+                      {{ deletingInvoiceId() === invoice.id ? 'Suppression...' : 'Supprimer' }}
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      </section>
+    </main>
+  </div>
 </div>
