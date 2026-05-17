@@ -9,7 +9,7 @@ import { CreatePatientDto, Patient } from '../models/patient.model';
 })
 export class MedicalBillingApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = 'https://medical-billing-app-zxko.onrender.com';
 
   getPatients(): Observable<Patient[]> {
     return this.http.get<Patient[]>(`${this.apiUrl}/patients`);
