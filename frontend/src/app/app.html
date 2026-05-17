@@ -13,22 +13,26 @@
       </div>
 
       <nav class="sidebar-nav">
-        <button type="button" class="active">
+        <button type="button" [class.active]="activeView() === 'dashboard'"
+    (click)="setActiveView('dashboard')">
           <i class="ri-dashboard-line"></i>
           <span>Tableau de bord</span>
         </button>
 
-        <button type="button">
+        <button type="button" [class.active]="activeView() === 'patients'"
+    (click)="setActiveView('patients')">
           <i class="ri-user-3-line"></i>
           <span>Patients</span>
         </button>
 
-        <button type="button">
+        <button type="button"  [class.active]="activeView() === 'invoices'"
+    (click)="setActiveView('invoices')">
           <i class="ri-file-list-3-line"></i>
           <span>Factures</span>
         </button>
 
-        <button type="button">
+        <button type="button"  [class.active]="activeView() === 'summary'"
+    (click)="setActiveView('summary')">
           <i class="ri-wallet-3-line"></i>
           <span>Résumé</span>
         </button>
@@ -48,6 +52,7 @@
     </aside>
 
     <main class="dashboard-main">
+      @if (activeView() === 'dashboard') {
       <header class="top-card">
         <div>
           <p class="date-badge">
@@ -83,9 +88,6 @@
         </div>
       </header>
 
-      @if (deleteError()) {
-        <p class="error-message global-message">{{ deleteError() }}</p>
-      }
 
       <section class="stats-grid">
         <article class="stat-card">
@@ -134,15 +136,20 @@
           </div>
         </article>
       </section>
-
-      <section class="content-grid">
+      }
+      @if (deleteError()) {
+  <p class="error-message global-message">{{ deleteError() }}</p>
+}
+@if (activeView() === 'dashboard' || activeView() === 'patients' || activeView() === 'invoices' || activeView() === 'summary') {
+      <section class="content-grid" [class.single-content]="activeView() !== 'dashboard'">
+        @if (activeView() === 'dashboard' || activeView() === 'patients' || activeView() === 'invoices') {
         <section class="panel form-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Saisie rapide</p>
-              <h2>Ajouter une donnée</h2>
+              <p class="eyebrow">{{ activeView() === 'patients' ? 'Patients' : activeView() === 'invoices' ? 'Factures' : 'Saisie rapide' }}</p>
+              <h2>  {{ activeView() === 'patients' ? 'Ajouter un patient' : activeView() === 'invoices' ? 'Ajouter une facture' : 'Ajouter une donnée' }}</h2>
             </div>
-
+@if (activeView() === 'dashboard') {
             <div class="form-tabs">
               <button
                 type="button"
@@ -162,9 +169,10 @@
                 Facture
               </button>
             </div>
+          }
           </div>
 
-          @if (activeForm === 'patient') {
+          @if (activeView() === 'patients' || (activeView() === 'dashboard' && activeForm === 'patient')) {
             <form class="quick-patient-form" (ngSubmit)="createPatient()">
   <div class="quick-form-grid">
     <div class="form-group">
@@ -209,8 +217,7 @@
             }
           }
 
-          @if (activeForm === 'facture') {
-            <form class="quick-form invoice-form" (ngSubmit)="createInvoice()">
+@if (activeView() === 'invoices' || (activeView() === 'dashboard' && activeForm === 'facture')) {            <form class="quick-form invoice-form" (ngSubmit)="createInvoice()">
               <div class="form-group">
                 <label for="invoicePatient">Patient</label>
 
@@ -325,7 +332,8 @@
             }
           }
         </section>
-
+      }
+@if (activeView() === 'dashboard' || activeView() === 'summary') {
         <section class="panel summary-panel">
           <div class="panel-heading summary-heading">
             <div>
@@ -392,13 +400,17 @@
             </p>
           }
         </section>
+      }
+      
       </section>
+    }
 
-      <section class="bottom-grid">
-        <section class="panel list-panel">
+@if (activeView() === 'dashboard' || activeView() === 'patients' || activeView() === 'invoices') {
+  <section class="bottom-grid" [class.single-content]="activeView() !== 'dashboard'">
+    @if (activeView() === 'dashboard' || activeView() === 'patients') {        <section class="panel list-panel">
           <div class="panel-heading list-heading">
             <div>
-              <p class="eyebrow">Patients</p>
+              <p class="eyebrow"> Patients</p>
               <h2>Liste des patients</h2>
             </div>
 
@@ -455,7 +467,9 @@
             </div>
           }
         </section>
+}
 
+@if (activeView() === 'dashboard' || activeView() === 'invoices') {
         <section class="panel list-panel">
           <div class="panel-heading list-heading">
             <div>
@@ -533,7 +547,9 @@
             </div>
           }
         </section>
+      }
       </section>
+    }
     </main>
   </div>
 </div>

@@ -948,3 +948,7 @@ select:focus {
     width: 100%;
   }
 }
+.content-grid.single-content,
+.bottom-grid.single-content {
+  grid-template-columns: 1fr;
+}

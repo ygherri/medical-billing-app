@@ -10,7 +10,7 @@ import {
   DailyBillingSummary,
 } from './models/invoice.model';
 
-
+type DashboardView = 'dashboard' | 'patients' | 'invoices' | 'summary';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +22,23 @@ export class App implements OnInit {
   private readonly medicalBillingApi = inject(MedicalBillingApiService);
   onCoverageTypeChange(coverageType: CoverageType): void {
     this.invoiceCoverageType.set(coverageType);
+  }
+  activeView = signal<DashboardView>('dashboard');
+
+  setActiveView(view: DashboardView): void {
+    this.activeView.set(view);
+
+    if (view === 'patients') {
+      this.activeForm = 'patient';
+    }
+
+    if (view === 'invoices') {
+      this.activeForm = 'facture';
+    }
+
+    if (view === 'summary') {
+      this.loadDailySummary();
+    }
   }
   activeForm: 'patient' | 'facture' = 'facture';
 
