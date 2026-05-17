@@ -6,9 +6,10 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://medical-billing-web.netlify.app/',
+      'https://medical-billing-web.netlify.app',
     ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 
